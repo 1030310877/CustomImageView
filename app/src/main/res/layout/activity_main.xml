@@ -17,18 +17,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:src="@mipmap/ic_launcher"
-            app:borderColor="#123456"
-            app:borderWidth="1dp"
-            app:shape="normal"/>
-
-        <joe.com.library.customimageview.CustomImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:src="@drawable/ddd"
-            app:shadow_depth="1.5dp"
-            app:shadow_mode="bottom|right"/>
+            app:shadow_color="#000000"
+            app:shadow_dx="5dp"
+            app:shadow_dy="5dp"
+            app:shadow_radius="3dp"/>
 
         <joe.com.library.customimageview.CustomImageView
             android:layout_width="wrap_content"
@@ -37,6 +30,10 @@
             android:src="@drawable/ddd"
             app:borderColor="#123456"
             app:borderWidth="1dp"
+            app:shadow_color="#000000"
+            app:shadow_dx="5dp"
+            app:shadow_dy="5dp"
+            app:shadow_radius="3dp"
             app:shape="circle"/>
 
         <joe.com.library.customimageview.CustomImageView
@@ -50,6 +47,10 @@
             app:leftTop_cornerRadius="8dp"
             app:rightBottom_cornerRadius="8dp"
             app:rightTop_cornerRadius="8dp"
+            app:shadow_color="#000000"
+            app:shadow_dx="5dp"
+            app:shadow_dy="5dp"
+            app:shadow_radius="3dp"
             app:shape="round"/>
     </LinearLayout>
 

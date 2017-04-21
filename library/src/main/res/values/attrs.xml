@@ -13,13 +13,9 @@
         <attr name="leftBottom_cornerRadius" format="dimension"/>
         <attr name="rightTop_cornerRadius" format="dimension"/>
         <attr name="rightBottom_cornerRadius" format="dimension"/>
-        <attr name="shadow_depth" format="dimension"/>
+        <attr name="shadow_radius" format="dimension"/>
         <attr name="shadow_color" format="color"/>
-        <attr name="shadow_mode">
-            <flag name="left" value="1"/>
-            <flag name="right" value="2"/>
-            <flag name="top" value="4"/>
-            <flag name="bottom" value="8"/>
-        </attr>
+        <attr name="shadow_dx" format="dimension"/>
+        <attr name="shadow_dy" format="dimension"/>
     </declare-styleable>
 </resources>
