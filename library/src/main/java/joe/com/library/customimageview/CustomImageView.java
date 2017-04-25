@@ -4,21 +4,29 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 /**
  * 更加灵活的ImageView
  * Created by joe on 2017/4/20.
  */
-public class CustomImageView extends AppCompatImageView {
+public class CustomImageView extends AppCompatImageView implements ViewTreeObserver.OnGlobalLayoutListener {
 
     public static final int SHAPE_NORMAL = 0;
     public static final int SHAPE_CIRCLE = 1;
@@ -37,11 +45,17 @@ public class CustomImageView extends AppCompatImageView {
     private int borderWidth;
     private int borderColor;
     private int shape;
+
     //// TODO: 2017/4/20
     private boolean supportZoomGesture = false;
+    private float mScale = 1.0f;
+    private ScaleGestureDetector scaleGestureDetector;
+    private GestureDetector gestureDetector;
 
     private Paint mPaint;
     private Path mPath;
+    private Matrix zoomMatrix;
+    private boolean firstDraw = true;
 
     public CustomImageView(Context context) {
         this(context, null);
@@ -115,6 +129,49 @@ public class CustomImageView extends AppCompatImageView {
                 setPadding(getPaddingLeft(), paddingTop, getPaddingRight(), paddingBottom);
             }
         }
+
+        if (supportZoomGesture) {
+            setScaleType(ScaleType.MATRIX);
+            initGestureDetector();
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnGlobalLayoutListener(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        } else {
+            getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        }
+    }
+
+    private void initGestureDetector() {
+        scaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleGestureDetector.OnScaleGestureListener
+                () {
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                mScale *= detector.getScaleFactor();
+
+                return true;
+            }
+
+            @Override
+            public boolean onScaleBegin(ScaleGestureDetector detector) {
+                return supportZoomGesture;
+            }
+
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+
+            }
+        });
     }
 
     @Override
@@ -137,6 +194,41 @@ public class CustomImageView extends AppCompatImageView {
             super.onDraw(canvas);
             canvas.restore();
             drawRoundBorder(canvas);
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (supportZoomGesture) {
+            if (scaleGestureDetector != null) {
+                return scaleGestureDetector.onTouchEvent(event);
+            }
+        }
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        if (getDrawable() != drawable) {
+            firstDraw = true;
+        }
+        super.setImageDrawable(drawable);
+    }
+
+    @Override
+    public void onGlobalLayout() {
+        if (firstDraw && supportZoomGesture) {
+            Drawable drawable = getDrawable();
+            if (drawable == null)
+                return;
+            Log.d("CustomImageView", "onGlobalLayout: " + drawable.getIntrinsicWidth() + ":" + drawable
+                    .getIntrinsicHeight());
+            int width = getWidth();
+            int height = getHeight();
+            int drawableWidth = drawable.getIntrinsicWidth();
+            int drawableHegiht = drawable.getIntrinsicHeight();
+            mScale = 1.0f;
+            firstDraw = false;
         }
     }
 
@@ -178,10 +270,10 @@ public class CustomImageView extends AppCompatImageView {
 
     private void drawRoundRegion(Canvas canvas) {
         RectF rectF = new RectF(0, 0, getMeasuredWidth(), getMeasuredHeight());
-        rectF.left += getPaddingLeft();
-        rectF.top += getPaddingTop();
-        rectF.right -= getPaddingRight();
-        rectF.bottom -= getPaddingBottom();
+        rectF.left += (getPaddingLeft() + 1);
+        rectF.top += (getPaddingTop() + 1);
+        rectF.right -= (getPaddingRight() + 1);
+        rectF.bottom -= (getPaddingBottom() + 1);
 
         mPath.reset();
         float[] radii = new float[8];
